@@ -76,7 +76,6 @@ export default function DashboardView() {
 
 
         <Grid size={{ xs: 12, md: 6 }}>
-
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6">Spending by Category</Typography>
             {byCategory.length === 0 && <Typography>No data</Typography>}
