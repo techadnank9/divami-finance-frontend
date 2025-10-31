@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, IconButton, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import {
+  Container, Typography, TextField, Button, Box,
+  IconButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { budgets } from '../services/pf';
 import Layout from '../components/Layout';
 import { formatCurrency } from '../utils/fomat';
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 export default function Budgets() {
   const [rows, setRows] = useState<any[]>([]);
@@ -32,7 +40,8 @@ export default function Budgets() {
     if (!category || !limit) return;
     try {
       await budgets.create({ category, limitAmount: Number(limit), month, year });
-      setLimit(''); await load();
+      setLimit('');
+      await load();
     } catch (e) {
       console.error(e);
     }
@@ -40,7 +49,8 @@ export default function Budgets() {
 
   const remove = async (id: string) => {
     try {
-      await budgets.del(id); await load();
+      await budgets.del(id);
+      await load();
     } catch (e) {
       console.error(e);
     }
@@ -54,10 +64,39 @@ export default function Budgets() {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
-          <TextField label="Category" value={category} onChange={e => setCategory(e.target.value)} />
-          <TextField label="Limit" value={limit} onChange={e => setLimit(e.target.value)} type="number" />
-          <TextField label="Month" type="number" value={month} onChange={e => setMonth(Number(e.target.value))} inputProps={{ min: 1, max: 12 }} />
-          <TextField label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
+          <TextField
+            label="Category"
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+          />
+          <TextField
+            label="Limit"
+            value={limit}
+            onChange={e => setLimit(e.target.value)}
+            type="number"
+          />
+
+          {/* ▼ Updated: month dropdown with month names */}
+          <TextField
+            select
+            label="Month"
+            value={month}
+            onChange={e => setMonth(Number(e.target.value))}
+            sx={{ minWidth: 160 }}
+          >
+            {MONTHS.map((name, index) => (
+              <MenuItem key={name} value={index + 1}>
+                {name}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            label="Year"
+            type="number"
+            value={year}
+            onChange={e => setYear(Number(e.target.value))}
+          />
           <Button variant="contained" onClick={add}>Add</Button>
         </Box>
 
@@ -76,7 +115,8 @@ export default function Budgets() {
               <TableRow key={r._id}>
                 <TableCell>{r.category}</TableCell>
                 <TableCell>{formatCurrency(r.limitAmount)}</TableCell>
-                <TableCell>{r.month}</TableCell>
+                {/* ▼ Month name shown instead of number */}
+                <TableCell>{MONTHS[(r.month || 1) - 1]}</TableCell>
                 <TableCell>{r.year}</TableCell>
                 <TableCell>
                   <IconButton aria-label="edit"><EditIcon /></IconButton>
