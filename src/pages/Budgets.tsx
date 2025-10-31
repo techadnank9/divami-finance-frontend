@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, TextField, Button, Box, IconButton, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { budgets } from '../services/pf';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { budgets } from '../services/pf';
 import Layout from '../components/Layout';
 
 export default function Budgets() {
@@ -11,21 +11,38 @@ export default function Budgets() {
   const [limit, setLimit] = useState('');
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [loading, setLoading] = useState(false);
 
   const load = async () => {
-    const data = await budgets.list({ year, month });
-    setRows(data || []);
+    setLoading(true);
+    try {
+      const data = await budgets.list({ year, month });
+      setRows(data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load() }, [year, month]);
+  useEffect(() => { load(); }, [year, month]);
 
   const add = async () => {
-    await budgets.create({ category, limitAmount: Number(limit), month, year });
-    setLimit(''); load();
+    if (!category || !limit) return;
+    try {
+      await budgets.create({ category, limitAmount: Number(limit), month, year });
+      setLimit(''); await load();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const remove = async (id: string) => {
-    await budgets.del(id); load();
+    try {
+      await budgets.del(id); await load();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -35,10 +52,10 @@ export default function Budgets() {
           <Typography variant="h5">Budgets</Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
           <TextField label="Category" value={category} onChange={e => setCategory(e.target.value)} />
-          <TextField label="Limit" value={limit} onChange={e => setLimit(e.target.value)} />
-          <TextField label="Month" type="number" value={month} onChange={e => setMonth(Number(e.target.value))} />
+          <TextField label="Limit" value={limit} onChange={e => setLimit(e.target.value)} type="number" />
+          <TextField label="Month" type="number" value={month} onChange={e => setMonth(Number(e.target.value))} inputProps={{ min: 1, max: 12 }} />
           <TextField label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           <Button variant="contained" onClick={add}>Add</Button>
         </Box>
@@ -61,11 +78,18 @@ export default function Budgets() {
                 <TableCell>{r.month}</TableCell>
                 <TableCell>{r.year}</TableCell>
                 <TableCell>
-                  <IconButton><EditIcon /></IconButton>
-                  <IconButton onClick={() => remove(r._id)}><DeleteIcon /></IconButton>
+                  <IconButton aria-label="edit"><EditIcon /></IconButton>
+                  <IconButton aria-label="delete" onClick={() => remove(r._id)}><DeleteIcon /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Typography align="center" sx={{ py: 3 }}>No budgets yet</Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Container>
