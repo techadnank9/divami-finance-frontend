@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { tx, budgets } from '../services/pf';
 import dayjs from 'dayjs';
+import { formatCurrency } from '../utils/fomat';
 
 export default function DashboardView() {
   const [income, setIncome] = useState<number>(0);
@@ -67,7 +68,7 @@ export default function DashboardView() {
         <Grid size={{ xs: 12, md: 3 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="subtitle2">Total Income (This Month)</Typography>
-            <Typography variant="h5" sx={{ mt: 1 }}>{income}</Typography>
+            <Typography variant="h5" sx={{ mt: 1 }}>{formatCurrency(income)}</Typography>
           </Paper>
         </Grid>
 
@@ -81,7 +82,7 @@ export default function DashboardView() {
         <Grid size={{ xs: 12, md: 3 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="subtitle2">Balance</Typography>
-            <Typography variant="h5" sx={{ mt: 1 }}>{balance}</Typography>
+            <Typography variant="h5" sx={{ mt: 1 }}>{formatCurrency(balance)}</Typography>
           </Paper>
         </Grid>
 

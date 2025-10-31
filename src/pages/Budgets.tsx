@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { budgets } from '../services/pf';
 import Layout from '../components/Layout';
+import { formatCurrency } from '../utils/fomat';
 
 export default function Budgets() {
   const [rows, setRows] = useState<any[]>([]);
@@ -74,7 +75,7 @@ export default function Budgets() {
             {rows.map(r => (
               <TableRow key={r._id}>
                 <TableCell>{r.category}</TableCell>
-                <TableCell>{r.limitAmount}</TableCell>
+                <TableCell>{formatCurrency(r.limitAmount)}</TableCell>
                 <TableCell>{r.month}</TableCell>
                 <TableCell>{r.year}</TableCell>
                 <TableCell>
